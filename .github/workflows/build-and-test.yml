@@ -68,6 +68,7 @@ jobs:
         run: |
           cdk synth --quiet
           (cd cdk.out && zip -r ../cdk.out.zip .)
+          
       - uses: actions/upload-artifact@v1
         with:
           name: cdk.out
