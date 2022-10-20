@@ -7,6 +7,8 @@ on:
         type: string
       solution_name:
         type: string
+      deployment_bucket:
+        type: string
 
 permissions:
   contents: write
@@ -92,4 +94,4 @@ jobs:
       
       - name: Copy cloud assembly to S3
         run: |
-          aws s3 cp cdk.out.zip s3://${{env.deployment-bucket}}/cdk.out.zip
+          aws s3 cp cdk.out.zip s3://${{inputs.deployment_bucket}}/cdk.out.zip
