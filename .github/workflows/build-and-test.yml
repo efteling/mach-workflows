@@ -92,6 +92,14 @@ jobs:
           name: cdk.out
           path: cdk.out
       
-      - name: Copy cloud assembly to S3
-        run: |
-          aws s3 cp cdk.out.zip s3://${{inputs.deployment_bucket}}/cdk.out.zip
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/MACH-GitHubOIDC-Role
+          aws-region: eu-west-1       
+          
+      - name: Install CDK
+        run: npm install aws-cdk -g    
+        
+      - name: Deploy
+        run: cdk deploy --app cdk.out --require-approval never
