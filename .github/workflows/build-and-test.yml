@@ -82,7 +82,7 @@ jobs:
       - name: Build and package cloud assembly (synthesize) 🏗️
         id: synth        
         run: |
-          cdk synth --quiet
+          cdk synth  --context environment=${{ inputs.environment }} --quiet
           (cd cdk.out && zip -r ../cdk.out.zip .)
           
       - uses: actions/upload-artifact@v1
