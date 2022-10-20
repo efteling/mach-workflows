@@ -56,7 +56,7 @@ jobs:
         run: dotnet build $SOLUTION --configuration --no-restore
 
       - name: Run tests
-        run: dotnet test --configuration ${{ inputs.solution_name }} --no-restore --no-build --verbosity normal          
+        run: dotnet test --configuration ./src/${{ inputs.solution_name }} --no-restore --no-build --verbosity normal          
 
       - name: Install CDK 👷
         run: |
