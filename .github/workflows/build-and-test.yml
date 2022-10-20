@@ -1,0 +1,78 @@
+name: Build & Deploy Test (CI/CD)
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+   
+jobs:     
+  buildtest:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+        
+    steps:    
+      - name: Display environment
+        run: echo ${{ inputs.environment }}
+        
+      - name: Display environment specific secret
+        run: echo ${{ secrets.ENVSECRET }}        
+        
+      - name: Display repo secret
+        run: echo ${{ secrets.MY_REPO_SECRET }}
+        
+      - name: Checkout with REF 🛒
+        if: ${{ github.event.inputs.commit-sha }} != ''
+        uses: actions/checkout@v2
+        with:
+            ref: ${{ github.event.inputs.commit-sha }}
+            fetch-depth: '0'
+
+      - name: Setup Node.js 🚧
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+
+      - name: Setup .NET 6 SDK ⚙️
+        uses: actions/setup-dotnet@v2.1.0
+        with:
+          dotnet-version: 6.x                   
+
+      - name: Install CDK 👷
+        run: |
+          npm install -g aws-cdk
+      - name: Install AWS lambda tools 👷
+        run: |
+          dotnet tool install -g Amazon.Lambda.Tools
+          
+      - name: Install zip
+        uses: montudor/action-zip@v1
+
+      - name: Build and package lambda 🏗️
+        id: build        
+        run: |
+              dotnet lambda package --project-location ./src/Functions      
+          
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/MACH-GitHubOIDC-Role
+          aws-region: eu-west-1   
+          
+      - name: Build and package cloud assembly (synthesize) 🏗️
+        id: synth        
+        run: |
+          cdk synth --quiet
+          (cd cdk.out && zip -r ../cdk.out.zip .)
+      - uses: actions/upload-artifact@v1
+        with:
+          name: cdk.out
+          path: cdk.out
+      
+      - name: Copy cloud assembly to S3
+        run: |
+          aws s3 cp cdk.out.zip s3://${{env.deployment-bucket}}/cdk.out.zip
