@@ -20,7 +20,7 @@ permissions:
   id-token: write    
    
 jobs:     
-  build_and_test:
+  buildtest:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     outputs:
@@ -51,24 +51,24 @@ jobs:
 
       - name: Run tests
         run: dotnet test ./src/${{ inputs.solution_name }} --configuration Release --no-restore --no-build --verbosity normal 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: dotnet-build-artifact-${{ github.run_number }}
-        path: |
-          cdk.json
-          src/Directory.Build.props
-          src/Infrastructure/Infrastructure.csproj
-          src/Infrastructure/bin/Release
-          src/Functions/Functions.csproj
-          src/Functions/bin/Release
-        retention-days: 1        
-    - id: artifact-name-step
-      run: echo "artifact-name=dotnet-build-artifact-${{ github.run_number }}" >> $GITHUB_OUTPUT
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: dotnet-build-artifact-${{ github.run_number }}
+          path: |
+            cdk.json
+            src/Directory.Build.props
+            src/Infrastructure/Infrastructure.csproj
+            src/Infrastructure/bin/Release
+            src/Functions/Functions.csproj
+            src/Functions/bin/Release
+          retention-days: 1        
+      - id: artifact-name-step
+        run: echo "artifact-name=dotnet-build-artifact-${{ github.run_number }}" >> $GITHUB_OUTPUT
       
   synth:
     runs-on: ubuntu-latest
-    needs: [build-and-test]    
+    needs: [buildtest]    
     environment: ${{ inputs.environment }}
         
     steps:  
