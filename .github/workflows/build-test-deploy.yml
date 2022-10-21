@@ -54,7 +54,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: dotnet-build-artifact-${{ github.run_number }}
+          name: dotnet-build-artifact
           path: |
             cdk.json
             src/Directory.Build.props
@@ -64,7 +64,7 @@ jobs:
             src/Functions/bin/Release
           retention-days: 1        
       - id: artifact-name-step
-        run: echo "artifact-name=dotnet-build-artifact-${{ github.run_number }}" >> $GITHUB_OUTPUT
+        run: echo "artifact-name=dotnet-build-artifact" >> $GITHUB_OUTPUT
       
   synth:
     runs-on: ubuntu-latest
@@ -75,7 +75,7 @@ jobs:
       - name: Download artifact 
         uses: actions/download-artifact@v3
         with:
-          name: ${{ needs.buildandtest.outputs.artifact-name }}   
+          name: dotnet-build-artifact   
 
       - name: Setup Node.js 🚧
         uses: actions/setup-node@v3
