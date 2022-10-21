@@ -1,0 +1,114 @@
+name: Build, Test & Deploy (CD)
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+      solution_name:
+        type: string
+      upload-artifact:
+        type: bool
+        default: true
+    outputs:
+      artifact-name:
+        description: "The name of the uploaded artifact"
+        value: ${{ jobs.build-and-test.outputs.artifact-name }}
+permissions:
+  contents: write
+  deployments: write
+  id-token: write    
+   
+jobs:     
+  build-and-test:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    outputs:
+      artifact-name: ${{ steps.artifact-name-step.outputs.artifact-name }}        
+    steps:    
+      - name: Checkout 🛒
+        uses: actions/checkout@v3   
+
+      - name: Setup Node.js 🚧
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      
+      - name: Setup NuGet.exe for use with actions
+        uses: NuGet/setup-nuget@v1.1.1          
+
+      - name: RUN .NET Restore 🌱
+        run: |
+          dotnet restore ./src
+
+      - name: Setup .NET 6 SDK ⚙️
+        uses: actions/setup-dotnet@v2.1.0
+        with:
+          dotnet-version: 6.x    
+          
+      - name: Build
+        run: dotnet build ./src/${{ inputs.solution_name }} --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test ./src/${{ inputs.solution_name }} --configuration Release --no-restore --no-build --verbosity normal 
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: dotnet-build-artifact-${{ github.run_number }}
+        path: |
+          cdk.json
+          src/Directory.Build.props
+          src/Infrastructure/Infrastructure.csproj
+          src/Infrastructure/bin/Release
+          src/Functions/Functions.csproj
+          src/Functions/bin/Release
+        retention-days: 1        
+    - id: artifact-name-step
+      run: echo "artifact-name=dotnet-build-artifact-${{ github.run_number }}" >> $GITHUB_OUTPUT
+      
+  synth:
+    runs-on: ubuntu-latest
+    needs: [build-and-test]    
+    environment: ${{ inputs.environment }}
+        
+    steps:  
+      - name: Download artifact 
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ needs.build-and-test.outputs.artifact-name }}   
+
+      - name: Setup Node.js 🚧
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Setup .NET 6 SDK ⚙️
+        uses: actions/setup-dotnet@v2.1.0
+        with:
+          dotnet-version: 6.x 
+          
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/MACH-GitHubOIDC-Role
+          aws-region: eu-west-1          
+          
+      - name: Install CDK 👷
+        run: |
+          npm install -g aws-cdk  
+          
+      - name: Install AWS lambda tools 👷
+        run: |
+          dotnet tool install -g Amazon.Lambda.Tools
+          
+      - name: Install zip
+        uses: montudor/action-zip@v1
+
+      - name: Build and package lambda 🏗️
+        id: build        
+        run: |
+              dotnet lambda package --project-location ./src/Functions
+
+      - name: Deploy CDK app
+        run: cdk deploy --context environment=${{ inputs.environment }} --require-approval never
+  
