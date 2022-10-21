@@ -18,13 +18,6 @@ jobs:
     steps:    
       - name: Checkout 🛒
         uses: actions/checkout@v3
-
-      - name: Check for vulnerabilities (SNYK) 🔍
-        uses: snyk/actions/dotnet@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --file=./src/${{ inputs.solution_name }} --policy-path=./src/.snyk --show-vulnerable-paths=a        
       
       - name: Setup NuGet.exe for use with actions
         uses: NuGet/setup-nuget@v1.1.1          
@@ -37,6 +30,13 @@ jobs:
         uses: actions/setup-dotnet@v2.1.0
         with:
           dotnet-version: 6.x    
+
+      - name: Check for vulnerabilities (SNYK) 🔍
+        uses: snyk/actions/dotnet@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --file=./src/${{ inputs.solution_name }} --policy-path=./src/.snyk --show-vulnerable-paths=a       
           
       - name: Build 🏗️
         run: dotnet build ./src/${{ inputs.solution_name }} --configuration Release --no-restore
