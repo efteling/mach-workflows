@@ -3,11 +3,7 @@ name: Build & Test (CI)
 on:
   workflow_call:
     inputs:
-      environment:
-        type: string
       solution_name:
-        type: string
-      deployment_bucket:
         type: string
 
 permissions:
@@ -18,7 +14,6 @@ permissions:
 jobs:     
   build-and-test:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
         
     steps:    
       - name: Checkout 🛒
