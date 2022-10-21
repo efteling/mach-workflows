@@ -109,6 +109,12 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/MACH-GitHubOIDC-Role
           aws-region: eu-west-1 
           
-      - name: Deploy CDK app
-        run: cdk deploy --context environment=${{ inputs.environment }} --require-approval never
+      - name: Build and package cloud assembly (synthesize) 🏗️
+        id: synth        
+        run: |
+          cdk synth  --context environment=${{ inputs.environment }} --quiet
+          (cd cdk.out && zip -r ../cdk.out.zip .)
+
+      - name: Deploy
+        run: cdk deploy --app cdk.out --require-approval never
   
