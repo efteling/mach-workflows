@@ -112,7 +112,7 @@ jobs:
       - name: Build and package cloud assembly (synthesize) 🏗️
         id: synth        
         run: |
-          cdk synth  --context environment=${{ inputs.environment }} --quiet
+          cdk synth  --context environment=${{ inputs.environment }} 
           (cd cdk.out && zip -r ../cdk.out.zip .)
 
       - name: Deploy
