@@ -1,4 +1,4 @@
-name: Build & Deploy Test (CI/CD)
+name: Build & Test (CI)
 
 on:
   workflow_call:
@@ -16,36 +16,26 @@ permissions:
   id-token: write    
    
 jobs:     
-  buildtest:
+  build-and-test:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
         
     steps:    
-      - name: Display environment
-        run: echo ${{ inputs.environment }}
-        
-      - name: Display environment specific secret
-        run: echo ${{ secrets.ENVSECRET }}        
-        
-      - name: Display repo secret
-        run: echo ${{ secrets.MY_REPO_SECRET }}
-        
-      - name: Checkout with REF 🛒
-        if: ${{ github.event.inputs.commit-sha }} != ''
-        uses: actions/checkout@v2
-        with:
-            ref: ${{ github.event.inputs.commit-sha }}
-            fetch-depth: '0'
+      - name: Checkout 🛒
+        uses: actions/checkout@v3
 
-      - name: Setup Node.js 🚧
-        uses: actions/setup-node@v1
+      - name: Check for vulnerabilities (SNYK) 🔍
+        if:  ${{ github.event.inputs.snyk == 'true' }} 
+        uses: snyk/actions/dotnet@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          node-version: 16.x
+          args: --file=./src/${{ inputs.solution_name }} --policy-path=./src/.snyk --show-vulnerable-paths=a        
       
       - name: Setup NuGet.exe for use with actions
         uses: NuGet/setup-nuget@v1.1.1          
 
-      - name: RUN .NET Restore
+      - name: RUN .NET Restore 🌱
         run: |
           dotnet restore ./src
 
@@ -54,52 +44,11 @@ jobs:
         with:
           dotnet-version: 6.x    
           
-      - name: Build
+      - name: Build 🏗️
         run: dotnet build ./src/${{ inputs.solution_name }} --configuration Release --no-restore
 
       - name: Run tests
         run: dotnet test ./src/${{ inputs.solution_name }} --configuration Release --no-restore --no-build --verbosity normal          
-
-      - name: Install CDK 👷
-        run: |
-          npm install -g aws-cdk
-      - name: Install AWS lambda tools 👷
-        run: |
-          dotnet tool install -g Amazon.Lambda.Tools
-          
-      - name: Install zip
-        uses: montudor/action-zip@v1
-
-      - name: Build and package lambda 🏗️
-        id: build        
-        run: |
-              dotnet lambda package --project-location ./src/Functions      
-          
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/MACH-GitHubOIDC-Role
-          aws-region: eu-west-1   
-          
-      - name: Build and package cloud assembly (synthesize) 🏗️
-        id: synth        
-        run: |
-          cdk synth  --context environment=${{ inputs.environment }} --quiet
-          (cd cdk.out && zip -r ../cdk.out.zip .)
-          
-      - uses: actions/upload-artifact@v1
-        with:
-          name: cdk.out
-          path: cdk.out
-      
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/MACH-GitHubOIDC-Role
-          aws-region: eu-west-1       
-          
-      - name: Install CDK
-        run: npm install aws-cdk -g    
         
-      - name: Deploy
-        run: cdk deploy --app cdk.out --require-approval never
+    outputs:
+      SNYK: ${{ env.artifact-build-info }}        
