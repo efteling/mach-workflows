@@ -86,13 +86,7 @@ jobs:
         uses: actions/setup-dotnet@v2.1.0
         with:
           dotnet-version: 6.x 
-          
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/MACH-GitHubOIDC-Role
-          aws-region: eu-west-1          
-          
+
       - name: Install CDK 👷
         run: |
           npm install -g aws-cdk  
@@ -109,6 +103,12 @@ jobs:
         run: |
               dotnet lambda package --project-location ./src/Functions
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/MACH-GitHubOIDC-Role
+          aws-region: eu-west-1 
+          
       - name: Deploy CDK app
         run: cdk deploy --context environment=${{ inputs.environment }} --require-approval never
   
