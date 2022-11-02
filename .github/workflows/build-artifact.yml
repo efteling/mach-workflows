@@ -1,4 +1,4 @@
-name: Build & Test (CI)
+name: Build, Test & Create Artifact(CI)
 
 on:
   workflow_call:
@@ -35,6 +35,13 @@ jobs:
         uses: actions/setup-dotnet@v2.1.0
         with:
           dotnet-version: 6.x    
+
+      - name: Check for vulnerabilities (SNYK) 🔍
+        uses: snyk/actions/dotnet@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --file=./src/${{ inputs.solution_name }} --policy-path=./src/.snyk --show-vulnerable-paths=all
           
       - name: Install AWS lambda tools
         run:  dotnet tool install -g Amazon.Lambda.Tools          
