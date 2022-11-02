@@ -36,6 +36,9 @@ jobs:
         with:
           dotnet-version: 6.x    
           
+      - name: Install AWS lambda tools
+        run:  dotnet tool install -g Amazon.Lambda.Tools          
+        
       - name: Build 🏗️
         run: dotnet build ./src/${{ inputs.solution_name }} --configuration Release --no-restore
 
