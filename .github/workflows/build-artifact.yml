@@ -54,7 +54,6 @@ jobs:
 
       - name: Run unit tests
         run: |
-          dotnet test ./src/IntegrationTests --configuration Release --no-restore --no-build --verbosity normal    
           dotnet test ./src/UnitTests --configuration Release --no-restore --no-build --verbosity normal    
           dotnet test ./src/ComponentTests --configuration Release --no-restore --no-build --verbosity normal    
         
