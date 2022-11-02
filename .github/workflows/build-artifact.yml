@@ -52,8 +52,11 @@ jobs:
       - name: Build and package lambda
         run: dotnet lambda package --project-location ./src/${{ inputs.package_project }}
 
-      - name: Run tests
-        run: dotnet test ./src/${{ inputs.solution_name }} --configuration Release --no-restore --no-build --verbosity normal    
+      - name: Run unit tests
+        run: |
+          dotnet test ./src/IntegrationTests --configuration Release --no-restore --no-build --verbosity normal    
+          dotnet test ./src/UnitTests --configuration Release --no-restore --no-build --verbosity normal    
+          dotnet test ./src/ComponentTests --configuration Release --no-restore --no-build --verbosity normal    
         
       - name: Install CDK
         run: npm install aws-cdk -g
