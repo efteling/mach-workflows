@@ -10,9 +10,6 @@ on:
       artifact-name:
         type: string
         default: cdk.out
-    secrets:
-      AWS_ACCOUNT_ID:
-        required: true
 
 permissions:
   contents: read
