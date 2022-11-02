@@ -53,7 +53,7 @@ jobs:
         run: dotnet lambda package --project-location ./src/${{ inputs.package_project }}
 
       - name: Run tests
-        run: dotnet test ./src/${{ inputs.solution_name }} --configuration Release --no-restore --no-build --verbosity normal    
+        run: dotnet test ./src/${{ inputs.solution_name }} --configuration Release --no-restore --no-build --verbosity normal --filter "FullyQualifiedName!~IntegrationTests" 
         
       # Triggering SonarQube analysis as results of it are required by Quality Gate check.
       - name: SonarQube Scan
