@@ -16,7 +16,7 @@ permissions:
   id-token: write
 
 jobs:
-  deploy:
+  deploy-artifact:
     name: Deploy
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
