@@ -1,0 +1,48 @@
+
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+      artifact-name:
+        type: string
+        default: cdk.out
+    secrets:
+      AWS_ACCOUNT_ID:
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: cdk.out
+
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1-node16
+      with:
+        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/MACH-GitHubOIDC-Role
+        aws-region: eu-west-1
+
+    - name: Install CDK
+      run: npm install aws-cdk -g
+    
+    - name: Deploy CDK app
+      run: cdk deploy ${{ inputs.environment }}/* --app cdk.out --require-approval never
