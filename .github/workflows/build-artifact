@@ -1,0 +1,61 @@
+name: Build & Test (CI)
+
+on:
+  workflow_call:
+    inputs:
+      solution_name:
+        type: string
+      package_project:
+        description: 'Name of the main package project'
+        default: 'Functions'
+        required: false
+        type: string        
+
+permissions:
+  contents: write
+  deployments: write
+  id-token: write    
+   
+jobs:     
+  build-rtifact:
+    runs-on: ubuntu-latest
+        
+    steps:    
+      - name: Checkout 🛒
+        uses: actions/checkout@v3
+      
+      - name: Setup NuGet.exe for use with actions
+        uses: NuGet/setup-nuget@v1.1.1          
+
+      - name: RUN .NET Restore 🌱
+        run: |
+          dotnet restore ./src
+
+      - name: Setup .NET 6 SDK ⚙️
+        uses: actions/setup-dotnet@v2.1.0
+        with:
+          dotnet-version: 6.x    
+          
+      - name: Build 🏗️
+        run: dotnet build ./src/${{ inputs.solution_name }} --configuration Release --no-restore
+
+      - name: Build and package lambda
+        run: dotnet lambda package --project-location ./src/${{ inputs.package_project }}
+
+      - name: Run tests
+        run: dotnet test ./src/${{ inputs.solution_name }} --configuration Release --no-restore --no-build --verbosity normal    
+        
+      - name: Install CDK
+        run: npm install aws-cdk -g
+        
+      - name: Synthesize
+        run: cdk synth --quiet
+        
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: cdk.out
+          path: cdk.out        
+        
+    outputs:
+      SNYK: ${{ env.artifact-build-info }}        
