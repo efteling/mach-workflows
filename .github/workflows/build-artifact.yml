@@ -10,6 +10,9 @@ on:
         default: 'Functions'
         required: false
         type: string        
+      sonar_key:
+        type: string
+        required: true
 
 permissions:
   contents: write
