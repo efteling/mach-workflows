@@ -10,9 +10,9 @@ on:
         default: 'Functions'
         required: false
         type: string        
-      sonar_key:
-        type: string
-        required: true
+      # sonar_key:
+      #   type: string
+      #   required: true
 
 permissions:
   contents: write
@@ -55,18 +55,18 @@ jobs:
       - name: Run tests
         run: dotnet test ./src/${{ inputs.solution_name }} --configuration Release --no-restore --no-build --verbosity normal --filter "FullyQualifiedName!~IntegrationTests" 
           
-      - name: Run SonarScanner 🦺
-        uses: highbyte/sonarscan-dotnet@v2.1.3
-        with:          
-          sonarProjectKey: ${{ inputs.sonar_key }}        # The key of the SonarQube project          
-          sonarProjectName:  ${{ inputs.sonar_key }}      # The name of the SonarQube project          
-          sonarOrganization: efteling                           # The name of the SonarQube organization in SonarCloud. For hosted SonarQube, skip this setting.   
-          dotnetBuildArguments: ./src/${{ inputs.solution_name }}         # Optional command arguments to dotnet build          
-          dotnetTestArguments: ./src/${{ inputs.solution_name }} --filter "FullyQualifiedName!~IntegrationTests" --logger trx --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover   # Optional command arguments to dotnet test         
-          sonarBeginArguments: /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" -d:sonar.cs.vstest.reportsPaths="**/TestResults/*.trx"                            # Optional extra command arguments the the SonarScanner 'begin' command
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Run SonarScanner 🦺
+      #   uses: highbyte/sonarscan-dotnet@v2.1.3
+      #   with:          
+      #     sonarProjectKey: ${{ inputs.sonar_key }}        # The key of the SonarQube project          
+      #     sonarProjectName:  ${{ inputs.sonar_key }}      # The name of the SonarQube project          
+      #     sonarOrganization: efteling                           # The name of the SonarQube organization in SonarCloud. For hosted SonarQube, skip this setting.   
+      #     dotnetBuildArguments: ./src/${{ inputs.solution_name }}         # Optional command arguments to dotnet build          
+      #     dotnetTestArguments: ./src/${{ inputs.solution_name }} --filter "FullyQualifiedName!~IntegrationTests" --logger trx --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover   # Optional command arguments to dotnet test         
+      #     sonarBeginArguments: /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" -d:sonar.cs.vstest.reportsPaths="**/TestResults/*.trx"                            # Optional extra command arguments the the SonarScanner 'begin' command
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and package lambda
         run: dotnet lambda package --project-location ./src/${{ inputs.package_project }}
