@@ -1,0 +1,14 @@
+name: Auto Labeler
+on:
+ pull_request:
+   types: [opened, edited, reopened, synchronize]
+
+jobs:
+ auto-labeler:
+   runs-on: ubuntu-latest
+   steps:
+     - uses: release-drafter/release-drafter@v5
+       with:
+         disable-releaser: true
+       env:
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
