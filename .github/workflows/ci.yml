@@ -20,8 +20,8 @@ permissions:
   id-token: write    
    
 jobs:     
-  build-artifact:
-    name: Build artifact
+  ci:
+    name: CI
     runs-on: ubuntu-latest
         
     steps:    
