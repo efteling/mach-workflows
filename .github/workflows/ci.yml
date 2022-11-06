@@ -39,7 +39,7 @@ jobs:
       - name: Check for vulnerabilities
         uses: snyk/actions/dotnet@master
         with:
-          args: --policy-path=.snyk --show-vulnerable-paths=all
+          args: --all-projects --policy-path=.snyk --show-vulnerable-paths=all
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}        
       
