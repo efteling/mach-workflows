@@ -25,38 +25,37 @@ jobs:
     runs-on: ubuntu-latest
         
     steps:    
-      - name: Checkout 🛒
+      - name: Checkout
         uses: actions/checkout@v3
-      
-      - name: Setup NuGet.exe for use with actions
-        uses: NuGet/setup-nuget@v1.1.1          
-
-      - name: RUN .NET Restore 🌱
-        run: |
-          dotnet restore ./src
-
-      - name: Setup .NET 6 SDK ⚙️
-        uses: actions/setup-dotnet@v2.1.0
+               
+      - name: Check for vulnerabilities
+        uses: snyk/actions/dotnet@master
+        with:
+          args: --policy-path=.snyk --show-vulnerable-paths=all
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}        
+            
+      - name: Setup .NET 6 SDK
+        uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 6.x    
-
-      - name: Check for vulnerabilities (SNYK) 🔍
-        uses: snyk/actions/dotnet@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --file=./src/${{ inputs.solution_name }} --policy-path=./src/.snyk --show-vulnerable-paths=all
           
       - name: Install AWS lambda tools
-        run:  dotnet tool install -g Amazon.Lambda.Tools          
+        run:  dotnet tool install -g Amazon.Lambda.Tools  
         
-      - name: Build 🏗️
-        run: dotnet build ./src/${{ inputs.solution_name }} --configuration Release --no-restore
-
-      - name: Run tests
-        run: dotnet test ./src/${{ inputs.solution_name }} --configuration Release --no-restore --no-build --verbosity normal --filter "FullyQualifiedName!~IntegrationTests" 
+      - name: Restore
+        run: dotnet restore src --runtime linux-x64
+        
+      - name: Build
+        run: dotnet build src --configuration Release --no-restore
+                       
+      - name: Package lambda
+        run: dotnet lambda package --project-location src/${{ inputs.package_project }}
+        
+      - name: Test
+        run: dotnet test src --configuration Release --no-build --filter "FullyQualifiedName!~IntegrationTests"
           
-      # - name: Run SonarScanner 🦺
+      # - name: SonarScanner
       #   uses: highbyte/sonarscan-dotnet@v2.1.3
       #   with:          
       #     sonarProjectKey: ${{ inputs.sonar_key }}        # The key of the SonarQube project          
@@ -68,9 +67,6 @@ jobs:
       #   env:
       #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and package lambda
-        run: dotnet lambda package --project-location ./src/${{ inputs.package_project }}
 
       - name: Install CDK
         run: npm install aws-cdk -g
