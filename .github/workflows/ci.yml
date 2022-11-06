@@ -32,26 +32,26 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 6.x    
-          
-      - name: Install AWS lambda tools
-        run:  dotnet tool install -g Amazon.Lambda.Tools  
-        
+                  
       - name: Restore
         run: dotnet restore src --runtime linux-x64
       
       - name: Check for vulnerabilities
         uses: snyk/actions/dotnet@master
         with:
-          args: --all-projects --policy-path=.snyk --show-vulnerable-paths=all
+          args: --policy-path=.snyk --show-vulnerable-paths=all
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}        
       
       - name: Build
         run: dotnet build src --configuration Release --no-restore
+
+      - name: Install AWS lambda tools
+        run:  dotnet tool install -g Amazon.Lambda.Tools                         
                        
       - name: Package lambda
         run: dotnet lambda package --project-location src/${{ inputs.package_project }}
-        
+
       - name: Test
         run: dotnet test src --configuration Release --no-build --filter "FullyQualifiedName!~IntegrationTests"
           
