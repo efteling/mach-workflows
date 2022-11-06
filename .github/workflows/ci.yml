@@ -44,7 +44,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}        
       
       - name: Build
-        run: dotnet build src --configuration Release --no-restore
+        run: dotnet build src --configuration Release --no-restore -warnaserror
 
       - name: Install AWS lambda tools
         run:  dotnet tool install -g Amazon.Lambda.Tools                         
