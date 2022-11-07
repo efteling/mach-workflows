@@ -5,11 +5,6 @@ on:
     inputs:
       solution_name:
         type: string
-      package_project:
-        description: 'Name of the main package project'
-        default: 'Functions'
-        required: false
-        type: string        
       # sonar_key:
       #   type: string
       #   required: true
@@ -21,7 +16,7 @@ permissions:
    
 jobs:     
   ci:
-    name: CI
+    name: Check, Buid, Test and Synthesize
     runs-on: ubuntu-latest
         
     steps:    
@@ -33,7 +28,7 @@ jobs:
         with:
           dotnet-version: 6.x    
                   
-      - name: Restore
+      - name: Restore dependencies
         run: dotnet restore src --runtime linux-x64
       
       - name: Check for vulnerabilities
@@ -45,12 +40,6 @@ jobs:
       
       - name: Build
         run: dotnet build src --configuration Release --no-restore -warnaserror
-
-      - name: Install AWS lambda tools
-        run:  dotnet tool install -g Amazon.Lambda.Tools                         
-                       
-      - name: Package lambda
-        run: dotnet lambda package --project-location src/${{ inputs.package_project }}
 
       - name: Test
         run: dotnet test src --configuration Release --no-build --filter "FullyQualifiedName!~IntegrationTests"
@@ -70,9 +59,12 @@ jobs:
 
       - name: Install CDK
         run: npm install aws-cdk -g
+                
+      - name: Install AWS lambda tools
+        run:  dotnet tool install -g Amazon.Lambda.Tools
         
       - name: Synthesize
-        run: cdk synth --quiet
+        run: cdk synth --quiet --ci
         
       - name: Upload artifact
         uses: actions/upload-artifact@v3
