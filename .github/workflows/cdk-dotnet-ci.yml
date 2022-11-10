@@ -42,7 +42,7 @@ jobs:
         run: dotnet build src --configuration Release --no-restore -warnaserror
 
       - name: Test
-        run: dotnet test src --configuration Release --no-build --filter "FullyQualifiedName!~IntegrationTests"
+        run: dotnet test src --configuration Release --no-build --filter "FullyQualifiedName~UnitTests|FullyQualifiedName~Component"
           
       # - name: SonarScanner
       #   uses: highbyte/sonarscan-dotnet@v2.1.3
