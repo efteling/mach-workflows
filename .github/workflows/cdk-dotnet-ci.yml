@@ -38,12 +38,11 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}        
       
-      - name: Check code style
-        run: dotnet format style src --no-restore --verify-no-changes
+      - name: Check code formatting
+        run: dotnet format src --no-restore --verify-no-changes
         
       - name: Code analysis
         uses: dotnet/code-analysis@v1
-        id: code-analysis
         with:
           solution: src
           build-breaking: true
