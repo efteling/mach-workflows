@@ -17,7 +17,7 @@ permissions:
 
 jobs:     
   build_test_scan:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     # environment: ${{ inputs.environment }}
     steps:    
       - name: Checkout 🛒
