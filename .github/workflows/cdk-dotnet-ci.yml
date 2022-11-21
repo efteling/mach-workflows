@@ -5,9 +5,6 @@ on:
     inputs:
       solution_name:
         type: string
-      # sonar_key:
-      #   type: string
-      #   required: true
 
 permissions:
   contents: write
@@ -29,7 +26,7 @@ jobs:
           dotnet-version: 6.x
                   
       - name: Restore dependencies
-        run: dotnet restore src --runtime linux-x64
+        run: dotnet restore
       
       - name: Check for vulnerabilities
         uses: snyk/actions/dotnet@master
@@ -39,36 +36,20 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}        
       
       - name: Check code formatting
-        run: dotnet format src --no-restore --verify-no-changes
+        run: dotnet format --no-restore --verify-no-changes
               
       - name: Build
-        run: dotnet build src --configuration Release --no-restore -warnaserror
+        run: dotnet build --configuration Release --no-restore -warnaserror
 
       - name: Test
-        run: dotnet test src --configuration Release --no-build --filter "FullyQualifiedName~UnitTests|FullyQualifiedName~Component"
-          
-      # - name: SonarScanner
-      #   uses: highbyte/sonarscan-dotnet@v2.1.3
-      #   with:          
-      #     sonarProjectKey: ${{ inputs.sonar_key }}        # The key of the SonarQube project          
-      #     sonarProjectName:  ${{ inputs.sonar_key }}      # The name of the SonarQube project          
-      #     sonarOrganization: efteling                           # The name of the SonarQube organization in SonarCloud. For hosted SonarQube, skip this setting.   
-      #     dotnetBuildArguments: ./src/${{ inputs.solution_name }}         # Optional command arguments to dotnet build          
-      #     dotnetTestArguments: ./src/${{ inputs.solution_name }} --filter "FullyQualifiedName!~IntegrationTests" --logger trx --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover   # Optional command arguments to dotnet test         
-      #     sonarBeginArguments: /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" -d:sonar.cs.vstest.reportsPaths="**/TestResults/*.trx"                            # Optional extra command arguments the the SonarScanner 'begin' command
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: dotnet test --configuration Release --no-build --filter "FullyQualifiedName~UnitTests|FullyQualifiedName~Component"
 
       - name: Install CDK
         run: npm install aws-cdk -g
-                
-      - name: Install AWS lambda tools
-        run:  dotnet tool install -g Amazon.Lambda.Tools
-        
+
       - name: Synthesize
         run: cdk synth --quiet --ci
-        
+
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
