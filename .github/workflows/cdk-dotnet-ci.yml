@@ -47,6 +47,9 @@ jobs:
       - name: Install CDK
         run: npm install aws-cdk -g
 
+      - name: Install AWS lambda tools
+        run:  dotnet tool install -g Amazon.Lambda.Tools
+
       - name: Synthesize
         run: cdk synth --quiet --ci
 
