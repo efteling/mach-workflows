@@ -30,7 +30,7 @@ jobs:
 
       - name: RUN .NET Restore 🌱
         run: |
-          dotnet restore ./src
+          dotnet restore
 
       - name: Setup .NET 6 SDK ⚙️
         uses: actions/setup-dotnet@v2.1.0
