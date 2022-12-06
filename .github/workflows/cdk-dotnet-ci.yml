@@ -2,10 +2,6 @@ name: CI
 
 on:
   workflow_call:
-    inputs:
-      sonarkey:
-        type: string
-        required: true
 
 permissions:
   contents: write
@@ -43,7 +39,7 @@ jobs:
         run: dotnet tool install --global dotnet-sonarscanner
         
       - name: SonarScanner begin
-        run: dotnet sonarscanner begin /o:efteling /k:${{ inputs.sonarkey }} /d:sonar.login=${{ secrets.SONAR_TOKEN }}
+        run: dotnet sonarscanner begin /o:efteling /k:efteling_${{ github.repository }} /d:sonar.login=${{ secrets.SONAR_TOKEN }}
 
       - name: Build
         run: dotnet build --configuration Release --no-restore -warnaserror
