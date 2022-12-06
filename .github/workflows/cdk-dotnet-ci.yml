@@ -41,7 +41,7 @@ jobs:
         run: dotnet tool install dotnet-sonarscanner --global
         
       - name: SonarScanner begin
-        run: dotnet sonarscanner begin /o:efteling /k:${{ github.repository_owner }}_${{ github.event.repository.name }} /d:sonar.login=${{ secrets.SONAR_TOKEN }} /s:$GITHUB_WORKSPACE/SonarQube.Analysis.xml
+        run: dotnet sonarscanner begin /o:efteling /k:${{ github.repository_owner }}_${{ github.event.repository.name }} /d:sonar.login=${{ secrets.SONAR_TOKEN }} /s:SonarQube.Analysis.xml
 
       - name: Build
         run: dotnet build --configuration Release --no-restore -warnaserror
