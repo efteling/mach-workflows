@@ -14,13 +14,10 @@ jobs:
   build_test_scan:
     runs-on: ubuntu-latest
     steps:    
-      - name: Checkout =
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0     
-
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
                   
       - name: Setup .NET 6 SDK
         uses: actions/setup-dotnet@v3
@@ -34,7 +31,7 @@ jobs:
         uses: highbyte/sonarscan-dotnet@v2.1.3
         with:          
           sonarProjectKey: ${{ inputs.sonar_key }}      # The key of the SonarQube project          
-          sonarProjectName: ${{ inputs.sonar_key }}    # The name of the SonarQube project          
+          sonarProjectName: ${{ inputs.sonar_key }}     # The name of the SonarQube project          
           sonarOrganization: efteling                   # The name of the SonarQube organization in SonarCloud. For hosted SonarQube, skip this setting.   
           dotnetBuildArguments: --configuration Release # Optional command arguments to dotnet build          
           dotnetTestArguments: --filter "FullyQualifiedName~UnitTests|FullyQualifiedName~Component" --logger trx --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover   # Optional command arguments to dotnet test         
