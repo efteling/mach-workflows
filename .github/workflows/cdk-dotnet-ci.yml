@@ -16,6 +16,8 @@ jobs:
     steps:    
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
                   
       - name: Setup .NET 6 SDK
         uses: actions/setup-dotnet@v3
@@ -36,10 +38,10 @@ jobs:
         run: dotnet format --no-restore --verify-no-changes
         
       - name: Install SonarScanner
-        run: dotnet tool install --global dotnet-sonarscanner
+        run: dotnet tool install dotnet-sonarscanner --global
         
       - name: SonarScanner begin
-        run: dotnet sonarscanner begin /o:efteling /k:${{ github.repository_owner }}_${{ github.event.repository.name }} /d:sonar.login=${{ secrets.SONAR_TOKEN }}
+        run: dotnet sonarscanner begin /o:efteling /k:${{ github.repository_owner }}_${{ github.event.repository.name }} /d:sonar.login=${{ secrets.SONAR_TOKEN }} /d:sonar.host.url=https://sonarcloud.io
 
       - name: Build
         run: dotnet build --configuration Release --no-restore -warnaserror
