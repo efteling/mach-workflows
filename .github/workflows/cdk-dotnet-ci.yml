@@ -3,8 +3,9 @@ name: CI
 on:
   workflow_call:
     inputs:
-      solution_name:
+      sonarkey:
         type: string
+        required: true
 
 permissions:
   contents: write
@@ -37,12 +38,21 @@ jobs:
       
       - name: Check code formatting
         run: dotnet format --no-restore --verify-no-changes
-              
+        
+      - name: Install SonarScanner
+        run: dotnet tool install --global dotnet-sonarscanner
+        
+      - name: SonarScanner begin
+        run: dotnet sonarscanner begin /o:efteling /k:${{ inputs.sonarkey }} /d:sonar.login=${{ secrets.SONAR_TOKEN }}
+
       - name: Build
         run: dotnet build --configuration Release --no-restore -warnaserror
 
       - name: Test
-        run: dotnet test --configuration Release --no-build --filter "FullyQualifiedName~UnitTests|FullyQualifiedName~Component"
+        run: dotnet test --configuration Release --no-build dotnet test --settings coverlet.runsettings --logger:trx --filter "FullyQualifiedName~UnitTests|FullyQualifiedName~Component"
+
+      - name: SonarScanner end
+        run: dotnet sonarscanner end /d:sonar.login=${{ secrets.SONAR_TOKEN }}
 
       - name: Install CDK
         run: npm install aws-cdk -g
