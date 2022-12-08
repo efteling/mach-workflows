@@ -47,7 +47,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore -warnaserror
 
       - name: Test
-        run: dotnet test --configuration Release --no-build dotnet test --filter "FullyQualifiedName~UnitTests|FullyQualifiedName~Component" --settings coverlet.runsettings --logger:trx
+        run: dotnet test --configuration Release --no-build --filter "FullyQualifiedName~UnitTests|FullyQualifiedName~Component"
 
       #- name: SonarScanner end
       #  run: dotnet sonarscanner end /d:sonar.login=${{ secrets.SONAR_TOKEN }}
