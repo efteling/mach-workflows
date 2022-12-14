@@ -1,0 +1,29 @@
+name: IntegrationTests
+
+on:
+  workflow_call:
+
+permissions:
+  contents: write
+  deployments: write
+  id-token: write    
+   
+jobs:     
+  ci:
+    name: Run IntegrationTests
+    runs-on: ubuntu-latest
+        
+    steps:    
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+                  
+      - name: Setup .NET 6 SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.x
+
+      - name: Test
+        run: dotnet test --configuration Release --no-build --filter "FullyQualifiedName~IntegrationTests" 
+
