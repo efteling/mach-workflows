@@ -2,11 +2,13 @@ name: IntegrationTests
 
 on:
   workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
 
 permissions:
-  contents: write
-  deployments: write
-  id-token: write    
+  contents: read
    
 jobs:     
   ci:
@@ -23,7 +25,10 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 6.x
+          
+      - name: Set Environment
+        run: SET DOTNET_ENVIRONMENT=${{ inputs.environment }}
 
-      - name: Test
+      - name: Run Integration Tests
         run: dotnet test --configuration Release --filter "FullyQualifiedName~IntegrationTests" 
 
