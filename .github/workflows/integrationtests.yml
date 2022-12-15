@@ -27,7 +27,7 @@ jobs:
           dotnet-version: 6.x
           
       - name: Set Environment
-        run: SET DOTNET_ENVIRONMENT=${{ inputs.environment }}
+        run: export DOTNET_ENVIRONMENT=${{ inputs.environment }}
 
       - name: Run Integration Tests
         run: dotnet test --configuration Release --filter "FullyQualifiedName~IntegrationTests" 
