@@ -25,10 +25,7 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 6.x
-          
-      - name: Set Environment
-        run: export DOTNET_ENVIRONMENT=${{ inputs.environment }}
 
       - name: Run Integration Tests
-        run: dotnet test --configuration Release --filter "FullyQualifiedName~IntegrationTests" 
+        run: DOTNET_ENVIRONMENT=${{ inputs.environment }} dotnet test --configuration Release --filter "FullyQualifiedName~IntegrationTests" 
 
