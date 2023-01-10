@@ -41,4 +41,4 @@ jobs:
       run: npm install aws-cdk -g
     
     - name: Deploy CDK app
-      run: cdk deploy --app cdk.out --context environment=${{ inputs.environment }} --require-approval never
+      run: cdk deploy ${{ inputs.environment }}/* --app cdk.out --require-approval never
